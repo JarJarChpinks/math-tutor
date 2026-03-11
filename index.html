@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Математический Тренажер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- ГЛАВНОЕ МЕНЮ С ДВУМЯ КОЛОНКАМИ -->
+        <div id="main-menu" class="screen main-layout">
+            <div class="menu-left">
+                <div id="trophy-case">
+                    <h3>Награды: <span id="star-count">0</span> ⭐</h3>
+                    <div id="medals-container"></div>
+                </div>
+                <h1>Математика</h1>
+                <p>Ученик: <b id="display-name">Гость</b></p>
+                <div class="topics">
+                    <button onclick="prepareTest('multiplicationTable')">Таблица умножения</button>
+                    <button onclick="prepareTest('add2')">Сложение 2-значных</button>
+                    <button onclick="prepareTest('add3')">Сложение 3-значных</button>
+                    <button onclick="prepareTest('div2')">Деление 2-значных</button>
+                    <button onclick="prepareTest('mult2')">Умножение 2-значных</button>
+                    <button onclick="prepareTest('kraken')" class="kraken-btn">🐙 КРАКЕН</button>
+                </div>
+                <button class="parent-toggle-btn" onclick="openParentPanel()">⚙️ Настройки</button>
+            </div>
+
+            <div class="menu-right">
+                <h3>История успехов</h3>
+                <div class="history-table-wrapper">
+                    <table>
+                        <thead><tr><th>Имя</th><th>Тема</th><th>Ош.</th><th>Время</th></tr></thead>
+                        <tbody id="history-body"></tbody>
+                    </table>
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">Прервано: <span id="aborted-total">0</span></p>
+            </div>
+        </div>
+
+        <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
+        <div id="parent-panel" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>Настройки</h2>
+                <div class="settings-form">
+                    <label>Имя ученика: <br><input type="text" id="studentName" placeholder="Введите имя..."></label><br><br>
+                    <label><input type="checkbox" id="resetOnError"> Обнулять при 5 ошибках</label><br><br>
+                    <label>Примеров: <input type="number" id="countLimit" value="10" min="1"></label>
+                </div>
+                <br>
+                <button class="close-btn" onclick="closeParentPanel()">Сохранить и закрыть</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН ИГРЫ -->
+        <div id="game-screen" class="screen" style="display: none;">
+            <div class="progress-container"><div id="progress-bar"></div></div>
+            <div id="problem-container">
+                <span id="question">?</span> = <input type="number" id="answer-input">
+                <button onclick="checkAnswer()">Готово</button>
+            </div>
+            <div id="error-hint" class="hint" style="display: none;"></div>
+            <div class="status-info">Пример <span id="cur-idx">1</span></div>
+            <button onclick="abortTest()" class="back-btn">Прервать</button>
+        </div>
+
+        <!-- ЭКРАН СТАТИСТИКИ -->
+        <div id="stats-screen" class="screen" style="display: none;">
+            <h2>Тест окончен!</h2>
+            <div id="session-result"></div>
+            <ul id="wrong-answers-list" style="text-align: left; font-size: 14px;"></ul>
+            <button class="close-btn" onclick="location.reload()">В меню</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
