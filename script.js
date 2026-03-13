@@ -89,23 +89,40 @@ function nextQuestion() {
 
 function checkAnswer() {
     const input = document.getElementById('answer-input');
-    const val = parseInt(input.value);
+    const userVal = input.value.trim(); // Получаем строку и убираем пробелы
+    
+    // Если поле пустое, ничего не делаем
+    if (userVal === "") return;
+
+    const val = parseInt(userVal);
     const errMax = parseInt(localStorage.getItem('math_err_max')) || 5;
 
     if (val === currentProblem.ans) {
-        sound(523, 'sine', 0.2);
+        sound(523, 'sine', 0.2); // Звук успеха
         if (hasCurrentError) stats.wrong++;
         solvedInSession++;
-        if (solvedInSession >= problemPool.length) finish(); else nextQuestion();
+        
+        if (solvedInSession >= problemPool.length) {
+            finish();
+        } else {
+            nextQuestion();
+        }
     } else {
-        sound(150, 'sawtooth', 0.3);
+        sound(150, 'sawtooth', 0.3); // Звук ошибки
         errorCount++;
+        
         if (!hasCurrentError) { 
             stats.wrongExamples.push(`${currentProblem.q} = ${currentProblem.ans}`); 
             hasCurrentError = true; 
         }
+        
+        // Визуальная индикация ошибки
         input.classList.add('error-shake');
-        setTimeout(() => input.classList.remove('error-shake'), 300);
+        setTimeout(() => {
+            input.classList.remove('error-shake');
+            input.value = ''; // Очищаем поле после ошибки, чтобы ввести заново
+            input.focus();
+        }, 300);
         
         document.getElementById('error-hint').innerText = "Подсказка: " + currentProblem.hint;
         document.getElementById('error-hint').style.display = 'block';
@@ -162,3 +179,4 @@ function updateParentDisplay() {
         `<tr><td>${l.name}</td><td>${l.topic}</td><td>${l.errors}</td><td>${l.time}</td><td>${l.date}</td></tr>`
     ).join('');
 }
+
