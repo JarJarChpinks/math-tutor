@@ -2,7 +2,6 @@ let currentProblem = {}, stats = { wrong: 0, wrongExamples: [] };
 let errorCount = 0, solvedInSession = 0, startTime = 0, hasCurrentError = false;
 let isKraken = false, isGameActive = false, problemPool = [];
 
-// Звуки (Web Audio API)
 const sound = (f, t, d) => {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -16,24 +15,19 @@ const sound = (f, t, d) => {
 };
 
 window.onload = () => {
-    document.getElementById('studentName').value = localStorage.getItem('student_name') || 'Гость';
-    document.getElementById('display-name').innerText = localStorage.getItem('student_name') || 'Гость';
+    const name = localStorage.getItem('student_name') || 'Гость';
+    document.getElementById('studentName').value = name;
+    document.getElementById('display-name').innerText = name;
     document.getElementById('difficultyLevel').value = localStorage.getItem('math_diff') || 'medium';
     document.getElementById('errorMax').value = localStorage.getItem('math_err_max') || 5;
     
-    // Глобальный слушатель Enter для поля ввода
-    document.getElementById('answer-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            checkAnswer();
-        }
-    });
-    
+    document.getElementById('answer-input').onkeypress = (e) => {
+        if (e.key === 'Enter') checkAnswer();
+    };
     updateParentDisplay();
 };
 
 function openParentPanel() { document.getElementById('parent-panel').style.display = 'flex'; }
-
 function closeParentPanel() {
     localStorage.setItem('student_name', document.getElementById('studentName').value || 'Гость');
     localStorage.setItem('math_diff', document.getElementById('difficultyLevel').value);
@@ -96,16 +90,15 @@ function nextQuestion() {
     document.getElementById('cur-idx').innerText = solvedInSession + 1;
     const input = document.getElementById('answer-input');
     input.value = '';
-    input.focus();
+    setTimeout(() => input.focus(), 10);
     updateProgress();
 }
 
 function checkAnswer() {
     const input = document.getElementById('answer-input');
+    if (input.value === "") return;
     const val = parseInt(input.value);
     const errMax = parseInt(localStorage.getItem('math_err_max')) || 5;
-
-    if (isNaN(val)) return; // Игнорируем пустой ввод
 
     if (val === currentProblem.ans) {
         sound(523, 'sine', 0.2);
@@ -122,17 +115,12 @@ function checkAnswer() {
         input.classList.add('error-shake');
         setTimeout(() => {
             input.classList.remove('error-shake');
-            input.value = ''; // Очищаем после ошибки для удобства
+            input.value = '';
             input.focus();
         }, 300);
-        
         document.getElementById('error-hint').innerText = "Подсказка: " + currentProblem.hint;
         document.getElementById('error-hint').style.display = 'block';
-        
-        if (errorCount >= errMax) {
-            alert("Лимит ошибок исчерпан!");
-            abortTest();
-        }
+        if (errorCount >= errMax) { alert("Лимит ошибок исчерпан!"); abortTest(); }
     }
 }
 
@@ -143,13 +131,13 @@ function finish() {
     saveToLog(isKraken ? 'КРАКЕН' : currentProblem.topic, stats.wrong, time, false);
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('stats-screen').style.display = 'block';
-    document.getElementById('session-result').innerText = `Ошибок: ${stats.wrong} | Время: ${time}с`;
+    document.getElementById('session-result').innerText = `Результат: ${solvedInSession - stats.wrong}/${solvedInSession} верных за ${time}с`;
     document.getElementById('wrong-answers-list').innerHTML = stats.wrongExamples.map(ex => `<li>${ex}</li>`).join('');
 }
 
 function abortTest() {
     alert("Ну ты и пёс!");
-    if (isGameActive) saveToLog(isKraken ? 'КРАКЕН' : currentProblem.topic, stats.wrong, 0, true);
+    if (isGameActive) saveToLog(isKraken ? 'КРАКЕН' : (currentProblem.topic || 'Тест'), stats.wrong, 0, true);
     location.reload();
 }
 
