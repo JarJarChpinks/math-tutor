@@ -65,7 +65,7 @@
             <div class="progress-container"><div id="progress-bar"></div></div>
             <div id="problem-container">
                 <span id="question">?</span> = 
-                <input type="number" id="answer-input" inputmode="numeric" autocomplete="off">
+                <input type="number" id="answer-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
                 <button class="close-btn" onclick="checkAnswer()">Готово</button>
             </div>
             <div id="error-hint" class="hint" style="display: none;"></div>
@@ -83,3 +83,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
