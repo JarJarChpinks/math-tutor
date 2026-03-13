@@ -11,7 +11,6 @@
             <div class="menu-left">
                 <div id="trophy-case">
                     <h3>Награды: <span id="star-count">0</span> ⭐</h3>
-                    <div id="medals-container"></div>
                 </div>
                 <h1>Математика</h1>
                 <p>Ученик: <b id="display-name">Гость</b></p>
@@ -25,19 +24,12 @@
                 </div>
                 <button class="parent-toggle-btn" onclick="openParentPanel()">⚙️ Настройки</button>
             </div>
-
             <div class="menu-right">
                 <h3>История успехов</h3>
                 <div class="history-table-wrapper">
                     <table>
                         <thead>
-                            <tr>
-                                <th>Имя</th>
-                                <th>Тема</th>
-                                <th>Ош/Всего</th>
-                                <th>Время</th>
-                                <th>Дата</th>
-                            </tr>
+                            <tr><th>Имя</th><th>Тема</th><th>Ош/Всего</th><th>Время</th><th>Дата/Час</th></tr>
                         </thead>
                         <tbody id="history-body"></tbody>
                     </table>
@@ -49,13 +41,10 @@
         <div id="parent-panel" class="modal" style="display: none;">
             <div class="modal-content">
                 <h2>Настройки</h2>
-                <div class="settings-form">
-                    <label>Имя ученика: <br><input type="text" id="studentName" placeholder="Введите имя..."></label><br><br>
-                    <label><input type="checkbox" id="resetOnError"> Прерывать при 5 ошибках</label><br><br>
-                    <label>Примеров: <input type="number" id="countLimit" value="10" min="1"></label>
-                </div>
-                <br>
-                <button class="close-btn" onclick="closeParentPanel()">Сохранить и закрыть</button>
+                <input type="text" id="studentName" placeholder="Имя ученика"><br><br>
+                <label><input type="checkbox" id="resetOnError"> Прерывать при 5 ошибках</label><br><br>
+                <label>Примеров: <input type="number" id="countLimit" value="10" min="1"></label><br><br>
+                <button class="close-btn" onclick="closeParentPanel()">Сохранить</button>
             </div>
         </div>
 
@@ -73,7 +62,7 @@
         <div id="stats-screen" class="screen" style="display: none;">
             <h2>Тест окончен!</h2>
             <div id="session-result"></div>
-            <ul id="wrong-answers-list" style="text-align: left; font-size: 14px;"></ul>
+            <ul id="wrong-answers-list"></ul>
             <button class="close-btn" onclick="location.reload()">В меню</button>
         </div>
     </div>
