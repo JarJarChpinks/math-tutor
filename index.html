@@ -8,11 +8,10 @@
 </head>
 <body>
     <div id="app">
-        <!-- ГЛАВНОЕ МЕНЮ -->
         <div id="main-menu" class="screen main-layout">
             <div class="menu-left">
                 <div id="trophy-case">
-                    <h3 class="stars-display">Награды: <span id="star-count">0</span> ⭐</h3>
+                    <h3 style="color: #fbc02d;">Награды: <span id="star-count">0</span> ⭐</h3>
                 </div>
                 <h1>Математика</h1>
                 <p>Ученик: <b id="display-name">Гость</b></p>
@@ -28,65 +27,57 @@
             </div>
 
             <div class="menu-right">
-                <h3>История успехов</h3>
+                <h3>История (последние 20)</h3>
                 <div class="history-table-wrapper">
                     <table>
                         <thead>
-                            <tr>
-                                <th>Имя</th>
-                                <th>Тема</th>
-                                <th>Ош/Всего</th>
-                                <th>Время</th>
-                                <th>Дата и Час</th>
-                            </tr>
+                            <tr><th>Имя</th><th>Тема</th><th>Ош/Всего</th><th>Время</th><th>Дата/Час</th></tr>
                         </thead>
                         <tbody id="history-body"></tbody>
                     </table>
                 </div>
-                <p class="aborted-text">Прервано: <span id="aborted-total">0</span></p>
+                <p style="font-size: 11px; color: #999; margin-top: 10px;">Прервано: <span id="aborted-total">0</span></p>
             </div>
         </div>
 
-        <!-- МОДАЛЬНОЕ ОКНО -->
         <div id="parent-panel" class="modal" style="display: none;">
             <div class="modal-content">
                 <h2>Настройки</h2>
-                <div class="settings-form">
-                    <label>Имя ученика: <br>
-                        <input type="text" id="studentName" placeholder="Введите имя...">
+                <div style="text-align: left; display: inline-block;">
+                    <label>Имя: <input type="text" id="studentName" style="width:100px"></label><br><br>
+                    <label>Сложность: 
+                        <select id="difficultyLevel">
+                            <option value="easy">Легко</option>
+                            <option value="medium" selected>Средне</option>
+                            <option value="hard">Профи</option>
+                        </select>
                     </label><br><br>
-                    <label>
-                        <input type="checkbox" id="resetOnError"> Прерывать при 5 ошибках
-                    </label><br><br>
-                    <label>Примеров: 
-                        <input type="number" id="countLimit" value="10" min="1" max="50">
+                    <label>Примеров: <input type="number" id="countLimit" value="10" min="1" max="50" style="width:50px"></label><br><br>
+                    <label>Лимит ошибок (1-5): 
+                        <input type="number" id="errorMax" value="5" min="1" max="5" style="width:50px">
                     </label>
-                </div>
-                <br>
-                <button class="close-btn" onclick="closeParentPanel()">Сохранить и закрыть</button>
+                </div><br><br>
+                <button class="close-btn" onclick="closeParentPanel()">Сохранить</button>
             </div>
         </div>
 
-        <!-- ЭКРАН ИГРЫ -->
         <div id="game-screen" class="screen" style="display: none;">
             <div class="progress-container"><div id="progress-bar"></div></div>
             <div id="problem-container">
                 <span id="question">?</span> = 
                 <input type="number" id="answer-input" inputmode="numeric" autocomplete="off">
-                <button class="action-btn" onclick="checkAnswer()">Готово</button>
+                <button class="close-btn" onclick="checkAnswer()">Готово</button>
             </div>
             <div id="error-hint" class="hint" style="display: none;"></div>
-            <div class="status-info">Пример <span id="cur-idx">1</span></div>
+            <p>Пример <span id="cur-idx">1</span></p>
             <button onclick="abortTest()" class="back-btn">Прервать тест</button>
         </div>
 
-        <!-- ЭКРАН СТАТИСТИКИ -->
         <div id="stats-screen" class="screen" style="display: none;">
-            <h2>Результат теста</h2>
-            <div id="session-result" class="final-score"></div>
-            <p>Ошибки в примерах:</p>
-            <ul id="wrong-answers-list"></ul>
-            <button class="close-btn" onclick="location.reload()">В главное меню</button>
+            <h2 id="finish-title">Тест завершен!</h2>
+            <div id="session-result" style="font-size: 18px; margin: 15px 0;"></div>
+            <ul id="wrong-answers-list" style="color: #d32f2f; text-align: left;"></ul>
+            <button class="close-btn" onclick="location.reload()">В меню</button>
         </div>
     </div>
     <script src="script.js"></script>
