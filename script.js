@@ -2,14 +2,17 @@ let currentProblem = {}, stats = { wrong: 0, wrongExamples: [] };
 let errorCount = 0, solvedInSession = 0, startTime = 0, hasCurrentError = false;
 let isKraken = false, isGameActive = false, problemPool = [];
 
+// Звуки (Web Audio API)
 const sound = (f, t, d) => {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = t; o.frequency.value = f;
-    o.connect(g); g.connect(ctx.destination);
-    o.start(); g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + d);
-    o.stop(ctx.currentTime + d);
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = t; o.frequency.value = f;
+        o.connect(g); g.connect(ctx.destination);
+        o.start(); g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + d);
+        o.stop(ctx.currentTime + d);
+    } catch(e) {}
 };
 
 window.onload = () => {
@@ -17,11 +20,20 @@ window.onload = () => {
     document.getElementById('display-name').innerText = localStorage.getItem('student_name') || 'Гость';
     document.getElementById('difficultyLevel').value = localStorage.getItem('math_diff') || 'medium';
     document.getElementById('errorMax').value = localStorage.getItem('math_err_max') || 5;
-    document.getElementById('answer-input').onkeydown = e => e.key === 'Enter' && checkAnswer();
+    
+    // Глобальный слушатель Enter для поля ввода
+    document.getElementById('answer-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkAnswer();
+        }
+    });
+    
     updateParentDisplay();
 };
 
 function openParentPanel() { document.getElementById('parent-panel').style.display = 'flex'; }
+
 function closeParentPanel() {
     localStorage.setItem('student_name', document.getElementById('studentName').value || 'Гость');
     localStorage.setItem('math_diff', document.getElementById('difficultyLevel').value);
@@ -40,7 +52,7 @@ function generateRawProblem(topic) {
             ans=a*b; symbol="×"; hint="Таблица умножения"; break;
         case 'add2': 
             let range = diff === 'easy' ? 40 : (diff === 'hard' ? 150 : 99);
-            a=r(10, range); b=r(10, range); ans=a+b; hint="Складывай десятки, потом единицы"; break;
+            a=r(10, range); b=r(10, range); ans=a+b; hint="Сложи десятки, потом единицы"; break;
         case 'add3': 
             a=r(100, 999); b=r(100, 999); ans=a+b; hint="Считай по разрядам"; break;
         case 'div2': 
@@ -82,45 +94,35 @@ function nextQuestion() {
     document.getElementById('error-hint').style.display = 'none';
     document.getElementById('question').innerText = currentProblem.q;
     document.getElementById('cur-idx').innerText = solvedInSession + 1;
-    document.getElementById('answer-input').value = '';
-    document.getElementById('answer-input').focus();
+    const input = document.getElementById('answer-input');
+    input.value = '';
+    input.focus();
     updateProgress();
 }
 
 function checkAnswer() {
     const input = document.getElementById('answer-input');
-    const userVal = input.value.trim(); // Получаем строку и убираем пробелы
-    
-    // Если поле пустое, ничего не делаем
-    if (userVal === "") return;
-
-    const val = parseInt(userVal);
+    const val = parseInt(input.value);
     const errMax = parseInt(localStorage.getItem('math_err_max')) || 5;
 
+    if (isNaN(val)) return; // Игнорируем пустой ввод
+
     if (val === currentProblem.ans) {
-        sound(523, 'sine', 0.2); // Звук успеха
+        sound(523, 'sine', 0.2);
         if (hasCurrentError) stats.wrong++;
         solvedInSession++;
-        
-        if (solvedInSession >= problemPool.length) {
-            finish();
-        } else {
-            nextQuestion();
-        }
+        if (solvedInSession >= problemPool.length) finish(); else nextQuestion();
     } else {
-        sound(150, 'sawtooth', 0.3); // Звук ошибки
+        sound(150, 'sawtooth', 0.3);
         errorCount++;
-        
         if (!hasCurrentError) { 
             stats.wrongExamples.push(`${currentProblem.q} = ${currentProblem.ans}`); 
             hasCurrentError = true; 
         }
-        
-        // Визуальная индикация ошибки
         input.classList.add('error-shake');
         setTimeout(() => {
             input.classList.remove('error-shake');
-            input.value = ''; // Очищаем поле после ошибки, чтобы ввести заново
+            input.value = ''; // Очищаем после ошибки для удобства
             input.focus();
         }, 300);
         
@@ -179,4 +181,3 @@ function updateParentDisplay() {
         `<tr><td>${l.name}</td><td>${l.topic}</td><td>${l.errors}</td><td>${l.time}</td><td>${l.date}</td></tr>`
     ).join('');
 }
-
