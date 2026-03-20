@@ -16,28 +16,31 @@ const sound = (f, t, d) => {
 
 window.onload = () => {
     const name = localStorage.getItem('student_name') || 'Гость';
-    document.getElementById('studentName').value = name;
-    document.getElementById('display-name').innerText = name;
-    document.getElementById('difficultyLevel').value = localStorage.getItem('math_diff') || 'medium';
-    document.getElementById('errorMax').value = localStorage.getItem('math_err_max') || 5;
+    if(document.getElementById('studentName')) document.getElementById('studentName').value = name;
+    if(document.getElementById('display-name')) document.getElementById('display-name').innerText = name;
+    if(document.getElementById('difficultyLevel')) document.getElementById('difficultyLevel').value = localStorage.getItem('math_diff') || 'medium';
+    if(document.getElementById('errorMax')) document.getElementById('errorMax').value = localStorage.getItem('math_err_max') || 5;
+    if(document.getElementById('countLimit')) document.getElementById('countLimit').value = localStorage.getItem('math_count_limit') || 10;
     
-    // Загружаем лимит из памяти
-    const savedLimit = localStorage.getItem('math_count_limit') || 10;
-    document.getElementById('countLimit').value = savedLimit;
-    
-    document.getElementById('answer-input').onkeypress = (e) => {
-        if (e.key === 'Enter') checkAnswer();
-    };
+    const input = document.getElementById('answer-input');
+    if(input) {
+        input.onkeypress = (e) => { if (e.key === 'Enter') checkAnswer(); };
+    }
     updateParentDisplay();
 };
 
-function openParentPanel() { document.getElementById('parent-panel').style.display = 'flex'; }
+function openParentPanel() { 
+    document.getElementById('parent-panel').style.display = 'flex'; 
+}
 
 function closeParentPanel() {
+    // Сохраняем всё в память
     localStorage.setItem('student_name', document.getElementById('studentName').value || 'Гость');
     localStorage.setItem('math_diff', document.getElementById('difficultyLevel').value);
     localStorage.setItem('math_err_max', document.getElementById('errorMax').value);
     localStorage.setItem('math_count_limit', document.getElementById('countLimit').value);
+    
+    // Перезагружаем страницу, чтобы применить настройки
     location.reload();
 }
 
@@ -64,28 +67,21 @@ function generateRawProblem(topic) {
 }
 
 function prepareTest(topic) {
-    // Берем значение напрямую из localStorage для надежности
-    const limitSetting = parseInt(localStorage.getItem('math_count_limit')) || 10;
-    const limit = topic === 'kraken' ? 5 : limitSetting;
+    const savedLimit = localStorage.getItem('math_count_limit') || 10;
+    const limit = topic === 'kraken' ? 5 : parseInt(savedLimit);
     
     problemPool = [];
     const used = new Set();
     const krakenTopics = ['multiplicationTable', 'add2', 'add3', 'div2', 'mult2'];
     let attempts = 0;
 
-    // Увеличиваем количество попыток поиска уникальных примеров до 3000
     while (problemPool.length < limit && attempts < 3000) {
         attempts++;
         let t = topic === 'kraken' ? krakenTopics[problemPool.length % krakenTopics.length] : topic;
         let p = generateRawProblem(t);
-        if (!used.has(p.q)) { 
-            used.add(p.q); 
-            problemPool.push(p); 
-        }
+        if (!used.has(p.q)) { used.add(p.q); problemPool.push(p); }
     }
-    
-    // Если набрали хоть что-то — запускаем
-    if (problemPool.length > 0) startTest(topic);
+    startTest(topic);
 }
 
 function startTest(topic) {
@@ -94,7 +90,6 @@ function startTest(topic) {
     stats = { wrong: 0, wrongExamples: [] };
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
-    document.getElementById('total-idx').innerText = problemPool.length;
     nextQuestion();
 }
 
@@ -104,6 +99,11 @@ function nextQuestion() {
     document.getElementById('error-hint').style.display = 'none';
     document.getElementById('question').innerText = currentProblem.q;
     document.getElementById('cur-idx').innerText = solvedInSession + 1;
+    
+    // Безопасное обновление счетчика "из X"
+    const totalEl = document.getElementById('total-idx');
+    if(totalEl) totalEl.innerText = problemPool.length;
+
     const input = document.getElementById('answer-input');
     input.value = '';
     setTimeout(() => input.focus(), 10);
@@ -112,7 +112,7 @@ function nextQuestion() {
 
 function checkAnswer() {
     const input = document.getElementById('answer-input');
-    if (input.value === "") return;
+    if (!input || input.value === "") return;
     const val = parseInt(input.value);
     const errMax = parseInt(localStorage.getItem('math_err_max')) || 5;
 
@@ -152,9 +152,7 @@ function finish() {
 }
 
 function abortTest() {
-    if (isGameActive) {
-        saveToLog(isKraken ? 'КРАКЕН' : (currentProblem.topic || 'Тест'), stats.wrong, 0, true);
-    }
+    if (isGameActive) saveToLog(isKraken ? 'КРАКЕН' : (currentProblem.topic || 'Тест'), stats.wrong, 0, true);
     location.reload();
 }
 
@@ -168,21 +166,25 @@ function saveToLog(topic, errors, time, aborted) {
         name: localStorage.getItem('student_name') || 'Гость',
         topic: aborted ? topic + " ❌" : topic,
         errors: `${errors}/${problemPool.length}`,
-        time: aborted ? "—" : time + "с",
+        time: time + "с",
         date: now.toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) + " " + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
     localStorage.setItem('math_v_final', JSON.stringify(h));
 }
 
 function updateProgress() { 
-    document.getElementById('progress-bar').style.width = (solvedInSession / problemPool.length * 100) + "%"; 
+    const bar = document.getElementById('progress-bar');
+    if(bar) bar.style.width = (solvedInSession / problemPool.length * 100) + "%"; 
 }
 
 function updateParentDisplay() {
     let h = JSON.parse(localStorage.getItem('math_v_final')) || { logs: [], aborted: 0, stars: 0 };
-    document.getElementById('star-count').innerText = h.stars;
-    document.getElementById('aborted-total').innerText = h.aborted;
-    document.getElementById('history-body').innerHTML = h.logs.slice(0, 20).map(l => 
-        `<tr><td>${l.name}</td><td>${l.topic}</td><td>${l.errors}</td><td>${l.time}</td><td>${l.date}</td></tr>`
-    ).join('');
+    if(document.getElementById('star-count')) document.getElementById('star-count').innerText = h.stars;
+    if(document.getElementById('aborted-total')) document.getElementById('aborted-total').innerText = h.aborted;
+    const history = document.getElementById('history-body');
+    if(history) {
+        history.innerHTML = h.logs.slice(0, 20).map(l => 
+            `<tr><td>${l.name}</td><td>${l.topic}</td><td>${l.errors}</td><td>${l.time}</td><td>${l.date}</td></tr>`
+        ).join('');
+    }
 }
