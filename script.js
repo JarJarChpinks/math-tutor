@@ -20,7 +20,10 @@ window.onload = () => {
     document.getElementById('display-name').innerText = name;
     document.getElementById('difficultyLevel').value = localStorage.getItem('math_diff') || 'medium';
     document.getElementById('errorMax').value = localStorage.getItem('math_err_max') || 5;
-    document.getElementById('countLimit').value = localStorage.getItem('math_count_limit') || 100;
+    
+    // ИСПРАВЛЕНО: Загружаем сохраненный лимит примеров из памяти
+    document.getElementById('countLimit').value = localStorage.getItem('math_count_limit') || 10;
+    
     document.getElementById('answer-input').onkeypress = (e) => {
         if (e.key === 'Enter') checkAnswer();
     };
@@ -28,11 +31,15 @@ window.onload = () => {
 };
 
 function openParentPanel() { document.getElementById('parent-panel').style.display = 'flex'; }
+
 function closeParentPanel() {
     localStorage.setItem('student_name', document.getElementById('studentName').value || 'Гость');
     localStorage.setItem('math_diff', document.getElementById('difficultyLevel').value);
     localStorage.setItem('math_err_max', document.getElementById('errorMax').value);
+    
+    // ИСПРАВЛЕНО: Сохраняем лимит в память перед перезагрузкой
     localStorage.setItem('math_count_limit', document.getElementById('countLimit').value);
+    
     location.reload();
 }
 
@@ -59,15 +66,18 @@ function generateRawProblem(topic) {
 }
 
 function prepareTest(topic) {
-    const limit = topic === 'kraken' ? 5 : parseInt(document.getElementById('countLimit').value) || 10;
+    // ИСПРАВЛЕНО: Берем лимит напрямую из памяти, чтобы избежать ошибок с интерфейсом
+    const savedLimit = localStorage.getItem('math_count_limit') || 10;
+    const limit = topic === 'kraken' ? 5 : parseInt(savedLimit);
+    
     problemPool = [];
     const used = new Set();
     const krakenTopics = ['multiplicationTable', 'add2', 'add3', 'div2', 'mult2'];
     let attempts = 0;
 
-    while (problemPool.length < limit && attempts < 500) {
+    while (problemPool.length < limit && attempts < 1000) { // Увеличил лимит попыток для больших тестов
         attempts++;
-        let t = topic === 'kraken' ? krakenTopics[problemPool.length] : topic;
+        let t = topic === 'kraken' ? krakenTopics[problemPool.length % krakenTopics.length] : topic;
         let p = generateRawProblem(t);
         if (!used.has(p.q)) { used.add(p.q); problemPool.push(p); }
     }
