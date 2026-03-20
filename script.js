@@ -20,7 +20,7 @@ window.onload = () => {
     document.getElementById('display-name').innerText = name;
     document.getElementById('difficultyLevel').value = localStorage.getItem('math_diff') || 'medium';
     document.getElementById('errorMax').value = localStorage.getItem('math_err_max') || 5;
-    
+    document.getElementById('countLimit').value = localStorage.getItem('math_count_limit') || 100;
     document.getElementById('answer-input').onkeypress = (e) => {
         if (e.key === 'Enter') checkAnswer();
     };
