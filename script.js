@@ -32,6 +32,7 @@ function closeParentPanel() {
     localStorage.setItem('student_name', document.getElementById('studentName').value || 'Гость');
     localStorage.setItem('math_diff', document.getElementById('difficultyLevel').value);
     localStorage.setItem('math_err_max', document.getElementById('errorMax').value);
+    localStorage.setItem('math_count_limit', document.getElementById('countLimit').value);
     location.reload();
 }
 
