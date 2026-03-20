@@ -21,8 +21,9 @@ window.onload = () => {
     document.getElementById('difficultyLevel').value = localStorage.getItem('math_diff') || 'medium';
     document.getElementById('errorMax').value = localStorage.getItem('math_err_max') || 5;
     
-    // ИСПРАВЛЕНО: Загружаем сохраненный лимит примеров из памяти
-    document.getElementById('countLimit').value = localStorage.getItem('math_count_limit') || 10;
+    // Загружаем лимит из памяти
+    const savedLimit = localStorage.getItem('math_count_limit') || 10;
+    document.getElementById('countLimit').value = savedLimit;
     
     document.getElementById('answer-input').onkeypress = (e) => {
         if (e.key === 'Enter') checkAnswer();
@@ -36,10 +37,7 @@ function closeParentPanel() {
     localStorage.setItem('student_name', document.getElementById('studentName').value || 'Гость');
     localStorage.setItem('math_diff', document.getElementById('difficultyLevel').value);
     localStorage.setItem('math_err_max', document.getElementById('errorMax').value);
-    
-    // ИСПРАВЛЕНО: Сохраняем лимит в память перед перезагрузкой
     localStorage.setItem('math_count_limit', document.getElementById('countLimit').value);
-    
     location.reload();
 }
 
@@ -66,22 +64,28 @@ function generateRawProblem(topic) {
 }
 
 function prepareTest(topic) {
-    // ИСПРАВЛЕНО: Берем лимит напрямую из памяти, чтобы избежать ошибок с интерфейсом
-    const savedLimit = localStorage.getItem('math_count_limit') || 10;
-    const limit = topic === 'kraken' ? 5 : parseInt(savedLimit);
+    // Берем значение напрямую из localStorage для надежности
+    const limitSetting = parseInt(localStorage.getItem('math_count_limit')) || 10;
+    const limit = topic === 'kraken' ? 5 : limitSetting;
     
     problemPool = [];
     const used = new Set();
     const krakenTopics = ['multiplicationTable', 'add2', 'add3', 'div2', 'mult2'];
     let attempts = 0;
 
-    while (problemPool.length < limit && attempts < 1000) { // Увеличил лимит попыток для больших тестов
+    // Увеличиваем количество попыток поиска уникальных примеров до 3000
+    while (problemPool.length < limit && attempts < 3000) {
         attempts++;
         let t = topic === 'kraken' ? krakenTopics[problemPool.length % krakenTopics.length] : topic;
         let p = generateRawProblem(t);
-        if (!used.has(p.q)) { used.add(p.q); problemPool.push(p); }
+        if (!used.has(p.q)) { 
+            used.add(p.q); 
+            problemPool.push(p); 
+        }
     }
-    startTest(topic);
+    
+    // Если набрали хоть что-то — запускаем
+    if (problemPool.length > 0) startTest(topic);
 }
 
 function startTest(topic) {
@@ -90,6 +94,7 @@ function startTest(topic) {
     stats = { wrong: 0, wrongExamples: [] };
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
+    document.getElementById('total-idx').innerText = problemPool.length;
     nextQuestion();
 }
 
@@ -147,8 +152,9 @@ function finish() {
 }
 
 function abortTest() {
-    alert("Ну ты и пёс!");
-    if (isGameActive) saveToLog(isKraken ? 'КРАКЕН' : (currentProblem.topic || 'Тест'), stats.wrong, 0, true);
+    if (isGameActive) {
+        saveToLog(isKraken ? 'КРАКЕН' : (currentProblem.topic || 'Тест'), stats.wrong, 0, true);
+    }
     location.reload();
 }
 
@@ -162,7 +168,7 @@ function saveToLog(topic, errors, time, aborted) {
         name: localStorage.getItem('student_name') || 'Гость',
         topic: aborted ? topic + " ❌" : topic,
         errors: `${errors}/${problemPool.length}`,
-        time: time + "с",
+        time: aborted ? "—" : time + "с",
         date: now.toLocaleDateString('ru-RU', {day:'2-digit', month:'2-digit'}) + " " + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
     });
     localStorage.setItem('math_v_final', JSON.stringify(h));
