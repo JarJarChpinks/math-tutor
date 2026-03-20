@@ -52,9 +52,8 @@
                             <option value="hard">Профи</option>
                         </select>
                     </label><br><br>
-                    <!-- УДАЛЕН ЛИМИТ max="50" -->
-                    <label>Примеров: <input type="number" id="countLimit" value="10" min="1" max="500" style="width:60px"></label><br><br>
-                    <label>Лимит ошибок (1-5): 
+                    <label>Примеров: <input type="number" id="countLimit" value="10" min="1" max="999" style="width:60px"></label><br><br>
+                    <label>Лимит ошибок: 
                         <input type="number" id="errorMax" value="5" min="1" max="10" style="width:50px">
                     </label>
                 </div><br><br>
@@ -70,7 +69,7 @@
                 <button class="close-btn" onclick="checkAnswer()">Готово</button>
             </div>
             <div id="error-hint" class="hint" style="display: none;"></div>
-            <p>Пример <span id="cur-idx">1</span> из <span id="total-idx">0</span></p>
+            <p>Пример <span id="cur-idx">1</span> из <span id="total-idx">10</span></p>
             <button onclick="abortTest()" class="back-btn">Прервать тест</button>
         </div>
 
